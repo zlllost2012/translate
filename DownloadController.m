@@ -2,8 +2,8 @@
 //  DownloadController.m
 //  Translate
 //
-//  Created by zz on 15/9/15.
-//  Copyright (c) 2015年 zz. All rights reserved.
+//  Created by zll on  15/9/14.
+//  Copyright (c) 2015年 zll. All rights reserved.
 //
 
 #import "DownloadController.h"
@@ -16,27 +16,35 @@
 @synthesize operation=_operation;
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     isDownload=false;
     UINavigationItem *nbi=[self navigationItem];
-    UIBarButtonItem *backBtn=[[UIBarButtonItem alloc]initWithTitle:@"返回" style:UIBarButtonItemStyleDone target:self action:@selector(back:)];
-    [nbi setLeftBarButtonItem:backBtn];
+    UIBarButtonItem *backItem=[[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"back.png"] style:UIBarButtonItemStyleDone target:self action:@selector(back:)];
+    [nbi setLeftBarButtonItem:backItem];
     [self.view setBackgroundColor:[UIColor whiteColor]];
-    float width=self.view.frame.size.width;
-    float height=self.view.frame.size.height;
-    downloadBtn=[[UIButton alloc]initWithFrame:CGRectMake(0., 20.+44.+20., width/2, 60)];
-    [downloadBtn setBackgroundColor:[UIColor redColor]];
-    unZip=[[UIButton alloc]initWithFrame:CGRectMake(width/2., 20.+44.+20., width/2, 60)];
-    [unZip setTitle:@"解压" forState:UIControlStateNormal];
-    [unZip setBackgroundColor:[UIColor blueColor]];
-    [unZip addTarget:self action:@selector(unZip) forControlEvents:UIControlEventTouchDown];
+    [self initView];
+    // Do any additional setup after loading the view.
+}
 
+-(void)initView{
+    float width=self.view.frame.size.width;
+    float height=self.view.frame.size.height-44.-20.;
+    float oy=self.view.frame.origin.y+44.+20.;
+    downloadBtn=[[UIButton alloc]initWithFrame:CGRectMake(20., oy+20., width-40., 60)];
+    [downloadBtn setBackgroundColor:[UIColor colorWithRed:66/255. green:163/255. blue:61/255. alpha:1.]];
+    [self setButtonStyle:downloadBtn];
+    
     progressView=[[ASProgressPopUpView alloc]initWithProgressViewStyle:UIProgressViewStyleDefault];
-    [progressView setFrame:CGRectMake(20, 20.+44.+20.+170., width-40., 5.)];
+    [progressView setFrame:CGRectMake(20, oy+20.+170., width-40., 5.)];
     progressView.popUpViewCornerRadius=12.0;
     progressView.font=[UIFont fontWithName:@"Futura-CondensedExtraBold" size:28];
-    progressLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 20.+44.+20.+170.+10., width, 40.)];
+    progressLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, oy+20.+170.+10., width, 40.)];
     [progressLabel setTextAlignment:NSTextAlignmentCenter];
+    
+    unZip=[[UIButton alloc]initWithFrame:CGRectMake(20., 20.+oy+170.+40.+10., width-40., 60)];
+    [unZip setTitle:@"解压" forState:UIControlStateNormal];
+    [unZip setBackgroundColor:[UIColor colorWithRed:218./255. green:152./255. blue:38./255. alpha:1.]];
+    [self setButtonStyle:unZip];
+    [unZip addTarget:self action:@selector(unZipClick:) forControlEvents:UIControlEventTouchDown];
     NSArray *arr=[[ZipFileInfoStore sharedStore]allItems];
     ZipFileInfoItem *zipFile;
     if([arr count]>0){
@@ -60,15 +68,64 @@
     }else{
         //当已存在下载文件且文件不完整时，直接开始下载；否则显示下载按钮手动下载
         if ([zipFile.fileCurSize longLongValue]>0&&[zipFile.fileCurSize longLongValue]<[zipFile.fileSize longLongValue]) {
-            [downloadBtn setTitle:@"暂停" forState:UIControlStateNormal];
-            [downloadBtn addTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
-            [progressView showPopUpViewAnimated:YES];
-            [unZip setAlpha:0.f];
-            [downloadBtn setAlpha:1.f];
-            [progressView setAlpha:1.f];
-            [progressLabel setAlpha:1.f];
-            isDownload=true;
-            [self startDownload];
+            hud=[MBProgressHUD showHUDAddedTo:self.view animated:YES];
+            hud.labelText=@"正在获取数据";
+            NSURL *baseURL = [NSURL URLWithString:@"http://www.baidu.com"];
+            AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:baseURL];
+            
+            //        NSOperationQueue *operationQueue = manager.operationQueue;
+            [manager.reachabilityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+                switch (status) {
+                    case AFNetworkReachabilityStatusReachableViaWWAN:{
+                        NSLog ( @"-------AFNetworkReachabilityStatusReachableViaWWAN------" );
+                        [hud hide:YES];
+                        [downloadBtn setTitle:@"暂停" forState:UIControlStateNormal];
+                        [downloadBtn addTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
+                        [progressView showPopUpViewAnimated:YES];
+                        [unZip setAlpha:0.f];
+                        [downloadBtn setAlpha:1.f];
+                        [progressView setAlpha:1.f];
+                        [progressLabel setAlpha:1.f];
+                        isDownload=true;
+                        [self startDownload];
+                    }
+                        break;
+                    case AFNetworkReachabilityStatusReachableViaWiFi:
+                    {
+                        NSLog ( @"-------AFNetworkReachabilityStatusReachableViaWWAN------" );
+                        [hud hide:YES];
+                        [downloadBtn setTitle:@"暂停" forState:UIControlStateNormal];
+                        [downloadBtn addTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
+                        [progressView showPopUpViewAnimated:YES];
+                        [unZip setAlpha:0.f];
+                        [downloadBtn setAlpha:1.f];
+                        [progressView setAlpha:1.f];
+                        [progressLabel setAlpha:1.f];
+                        isDownload=true;
+                        [self startDownload];
+                    }
+                        break;
+                    case AFNetworkReachabilityStatusNotReachable:{
+                        [downloadBtn setTitle:@"开始下载" forState:UIControlStateNormal];
+                        [downloadBtn addTarget:self action:@selector(download:) forControlEvents:UIControlEventTouchDown];
+                        [progressView showPopUpViewAnimated:NO];
+                        [unZip setAlpha:0.f];
+                        [downloadBtn setAlpha:1.f];
+                        [progressView setAlpha:0.f];
+                        [progressLabel setAlpha:0.f];
+                        isDownload=false;
+                        NSLog ( @"-------AFNetworkReachabilityStatusReachableNo------" );
+                        hud.labelText=@"无网络连接";
+                        [hud setMode:MBProgressHUDModeCustomView];
+                        [hud hide:YES afterDelay:1];
+                    }
+                        break;
+                    default:
+                        break;
+                }
+            }];
+            
+            [manager.reachabilityManager startMonitoring];
         }else if([zipFile.fileCurSize longLongValue]>0&&[zipFile.fileCurSize longLongValue]>=[zipFile.fileSize longLongValue]){
             [downloadBtn setTitle:@"重新下载" forState:UIControlStateNormal];
             [downloadBtn addTarget:self action:@selector(reDownload:) forControlEvents:UIControlEventTouchDown];
@@ -93,8 +150,22 @@
     [self.view addSubview: downloadBtn];
     [self.view addSubview:unZip];
     [self.view addSubview:progressLabel];
-    // Do any additional setup after loading the view.
 }
+-(void)setButtonStyle:(UIButton *)o{
+    [o.layer setMasksToBounds:YES];
+    [o.layer setCornerRadius:5.0];
+    //设置矩形四个圆角半径
+    //    [o.layer setBorderWidth:1.0];
+}
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self.tabBarController.tabBar setHidden:YES];
+}
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [self.tabBarController.tabBar setHidden:NO];
+}
+
 //返回
 -(void)back:(id)sender{
     if (isDownload) {
@@ -105,21 +176,66 @@
 }
 //开始下载
 -(void)download:(UIButton *)sender{
-    [downloadBtn setTitle:@"暂停" forState:UIControlStateNormal];
-    [downloadBtn removeTarget:self action:@selector(reDownload:) forControlEvents:UIControlEventTouchDown];
-        [downloadBtn removeTarget:self action:@selector(download:) forControlEvents:UIControlEventTouchDown];
-    [downloadBtn addTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
-    [unZip setAlpha:0.f];
-    [downloadBtn setAlpha:1.f];
-    [progressView setAlpha:1.f];
-    [progressLabel setAlpha:1.f];
-    if(!isDownload){
-    [self startDownload];
-    }
+    hud=[MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.labelText=@"正在请求数据";
+    NSURL *baseURL = [NSURL URLWithString:@"http://www.baidu.com"];
+    AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:baseURL];
+    
+    //        NSOperationQueue *operationQueue = manager.operationQueue;
+    [manager.reachabilityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        switch (status) {
+            case AFNetworkReachabilityStatusReachableViaWWAN:{
+                [hud hide:YES];
+                [downloadBtn setTitle:@"暂停" forState:UIControlStateNormal];
+                [downloadBtn removeTarget:self action:@selector(reDownload:) forControlEvents:UIControlEventTouchDown];
+                [downloadBtn removeTarget:self action:@selector(download:) forControlEvents:UIControlEventTouchDown];
+                [downloadBtn addTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
+                [unZip setAlpha:0.f];
+                [downloadBtn setAlpha:1.f];
+                [progressView setAlpha:1.f];
+                [progressLabel setAlpha:1.f];
+                if(!isDownload){
+                    NSLog ( @"-------AFNetworkReachabilityStatusReachableViaWWAN------" );
+                    [self startDownload];
+                }
+            }
+                break;
+            case AFNetworkReachabilityStatusReachableViaWiFi:
+            {
+                [hud hide:YES];
+                [downloadBtn setTitle:@"暂停" forState:UIControlStateNormal];
+                [downloadBtn removeTarget:self action:@selector(reDownload:) forControlEvents:UIControlEventTouchDown];
+                [downloadBtn removeTarget:self action:@selector(download:) forControlEvents:UIControlEventTouchDown];
+                [downloadBtn addTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
+                [unZip setAlpha:0.f];
+                [downloadBtn setAlpha:1.f];
+                [progressView setAlpha:1.f];
+                [progressLabel setAlpha:1.f];
+                if(!isDownload){
+                    NSLog ( @"-------AFNetworkReachabilityStatusReachableViaWWAN------" );
+                    [self startDownload];
+                }
+            }
+                break;
+            case AFNetworkReachabilityStatusNotReachable:{
+                isDownload=false;
+                NSLog ( @"-------AFNetworkReachabilityStatusReachableNo------" );
+                hud.labelText=@"无网络连接";
+                [hud setMode:MBProgressHUDModeCustomView];
+                [hud hide:YES afterDelay:1];
+            }
+                break;
+            default:
+                break;
+        }
+    }];
+    
+    [manager.reachabilityManager startMonitoring];
+
 }
 //暂停下载
 -(void)pauseDownload:(id)sender{
-    [downloadBtn setTitle:@"开始下载" forState:UIControlStateNormal];
+    [downloadBtn setTitle:@"继续下载" forState:UIControlStateNormal];
     [downloadBtn removeTarget:self action:@selector(reDownload:) forControlEvents:UIControlEventTouchDown];
     [downloadBtn removeTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
     [downloadBtn addTarget:self action:@selector(download:) forControlEvents:UIControlEventTouchDown];
@@ -135,50 +251,129 @@
 }
 //重新下载
 -(void)reDownload:(id)sender{
-    [downloadBtn setTitle:@"暂停" forState:UIControlStateNormal];
-    [downloadBtn removeTarget:self action:@selector(reDownload:) forControlEvents:UIControlEventTouchDown];
-    [downloadBtn removeTarget:self action:@selector(download:) forControlEvents:UIControlEventTouchDown];
-    [downloadBtn addTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
-    [unZip setAlpha:0.f];
-    [downloadBtn setAlpha:1.f];
-    [progressView setAlpha:1.f];
-    [progressLabel setAlpha:1.f];
-    if (!isDownload) {
-        [_operation cancel];
-    }
-    NSArray *arr=[[ZipFileInfoStore sharedStore]allItems];
-    ZipFileInfoItem *zipFile;
-    if([arr count]>0){
-        zipFile=[arr lastObject];
-    }else{
-        zipFile=[[ZipFileInfoStore sharedStore]createItem];
-        [[ZipFileInfoStore sharedStore]saveChanges];
-    }
     
-    [zipFile setFileName:@""];
-    [zipFile setFileSize:@""];
-    [zipFile setFileCurSize:@""];
-    [zipFile setFilePath:@""];
-    [zipFile setIsUnzip:NO];
-    [[ZipFileInfoStore sharedStore]saveChanges];
-    //清除缓存
-    NSArray *array=[DOWNLOAD_URL componentsSeparatedByString:@"/"];
-    zipName=[array lastObject];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
+    hud=[MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.labelText=@"正在请求数据";
+    NSURL *baseURL = [NSURL URLWithString:@"http://www.baidu.com"];
+    AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:baseURL];
     
-    NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory,NSUserDomainMask, YES) objectAtIndex:0];
+    //        NSOperationQueue *operationQueue = manager.operationQueue;
+    [manager.reachabilityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        switch (status) {
+            case AFNetworkReachabilityStatusReachableViaWWAN:{
+                [hud hide:YES];
+                [downloadBtn setTitle:@"暂停" forState:UIControlStateNormal];
+                [downloadBtn removeTarget:self action:@selector(reDownload:) forControlEvents:UIControlEventTouchDown];
+                [downloadBtn removeTarget:self action:@selector(download:) forControlEvents:UIControlEventTouchDown];
+                [downloadBtn addTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
+                [unZip setAlpha:0.f];
+                [downloadBtn setAlpha:1.f];
+                [progressView setAlpha:1.f];
+                [progressLabel setAlpha:1.f];
+                if (!isDownload) {
+                    [_operation cancel];
+                }
+                NSArray *arr=[[ZipFileInfoStore sharedStore]allItems];
+                ZipFileInfoItem *zipFile;
+                if([arr count]>0){
+                    zipFile=[arr lastObject];
+                }else{
+                    zipFile=[[ZipFileInfoStore sharedStore]createItem];
+                    [[ZipFileInfoStore sharedStore]saveChanges];
+                }
+                
+                [zipFile setFileName:@""];
+                [zipFile setFileSize:@""];
+                [zipFile setFileCurSize:@""];
+                [zipFile setFilePath:@""];
+                [zipFile setIsUnzip:NO];
+                [[ZipFileInfoStore sharedStore]saveChanges];
+                //清除缓存
+                NSArray *array=[DOWNLOAD_URL componentsSeparatedByString:@"/"];
+                zipName=[array lastObject];
+                NSFileManager *fileManager = [NSFileManager defaultManager];
+                
+                NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory,NSUserDomainMask, YES) objectAtIndex:0];
+                
+                NSString *delelteFilePath = [documentsDirectory stringByAppendingPathComponent:zipName];
+                
+                NSError *error;
+                
+                if ([fileManager removeItemAtPath:delelteFilePath error:&error] != YES)
+                    
+                    NSLog(@"Unable to delete file: %@", [error localizedDescription]);
+
+                [self startDownload];
+            }
+                break;
+            case AFNetworkReachabilityStatusReachableViaWiFi:
+            {
+                [hud hide:YES];
+                [downloadBtn setTitle:@"暂停" forState:UIControlStateNormal];
+                [downloadBtn removeTarget:self action:@selector(reDownload:) forControlEvents:UIControlEventTouchDown];
+                [downloadBtn removeTarget:self action:@selector(download:) forControlEvents:UIControlEventTouchDown];
+                [downloadBtn addTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
+                [unZip setAlpha:0.f];
+                [downloadBtn setAlpha:1.f];
+                [progressView setAlpha:1.f];
+                [progressLabel setAlpha:1.f];
+                if (!isDownload) {
+                    [_operation cancel];
+                }
+                NSArray *arr=[[ZipFileInfoStore sharedStore]allItems];
+                ZipFileInfoItem *zipFile;
+                if([arr count]>0){
+                    zipFile=[arr lastObject];
+                }else{
+                    zipFile=[[ZipFileInfoStore sharedStore]createItem];
+                    [[ZipFileInfoStore sharedStore]saveChanges];
+                }
+                
+                [zipFile setFileName:@""];
+                [zipFile setFileSize:@""];
+                [zipFile setFileCurSize:@""];
+                [zipFile setFilePath:@""];
+                [zipFile setIsUnzip:NO];
+                [[ZipFileInfoStore sharedStore]saveChanges];
+                //清除缓存
+                NSArray *array=[DOWNLOAD_URL componentsSeparatedByString:@"/"];
+                zipName=[array lastObject];
+                NSFileManager *fileManager = [NSFileManager defaultManager];
+                
+                NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory,NSUserDomainMask, YES) objectAtIndex:0];
+                
+                NSString *delelteFilePath = [documentsDirectory stringByAppendingPathComponent:zipName];
+                
+                NSError *error;
+                
+                if ([fileManager removeItemAtPath:delelteFilePath error:&error] != YES)
+                    
+                    NSLog(@"Unable to delete file: %@", [error localizedDescription]);
+
+                [self startDownload];
+            }
+                break;
+            case AFNetworkReachabilityStatusNotReachable:{
+                NSLog ( @"-------AFNetworkReachabilityStatusReachableNo------" );
+                hud.labelText=@"无网络连接";
+                [hud setMode:MBProgressHUDModeCustomView];
+                [hud hide:YES afterDelay:1];
+            }
+                break;
+            default:
+                break;
+        }
+    }];
     
-    NSString *delelteFilePath = [documentsDirectory stringByAppendingPathComponent:zipName];
-    
-    NSError *error;
-    
-    if ([fileManager removeItemAtPath:delelteFilePath error:&error] != YES)
-        
-        NSLog(@"Unable to delete file: %@", [error localizedDescription]);
-    [self startDownload];
+    [manager.reachabilityManager startMonitoring];
+
 }
 //开始继续下载
 -(void)startDownload{
+    __block UIViewController *controller=self;
+    __block ASProgressPopUpView *pv=progressView;
+    __block UILabel *pl=progressLabel;
+    __block MBProgressHUD *h=hud;
     isDownload=true;
     NSArray *arr=[[ZipFileInfoStore sharedStore]allItems];
     ZipFileInfoItem *zipFile;
@@ -223,8 +418,8 @@
     //下载进度回调
     [_operation setDownloadProgressBlock:^(NSUInteger bytesRead, long long totalBytesRead, long long totalBytesExpectedToRead) {
         //下载进度
-        [progressView setProgress:(float)(totalBytesRead + downloadedBytes)/ (totalBytesExpectedToRead + downloadedBytes) animated:YES];
-        [progressLabel setText:[NSString stringWithFormat:@"%.2fM/%.2fM",(float)(totalBytesRead + downloadedBytes)/1024/1024,(float)(totalBytesExpectedToRead + downloadedBytes)/1024/1024]];
+        [pv setProgress:(float)(totalBytesRead + downloadedBytes)/ (totalBytesExpectedToRead + downloadedBytes) animated:YES];
+        [pl setText:[NSString stringWithFormat:@"%.2fM/%.2fM",(float)(totalBytesRead + downloadedBytes)/1024/1024,(float)(totalBytesExpectedToRead + downloadedBytes)/1024/1024]];
         [zipFile setFileCurSize:[NSString stringWithFormat:@"%llu",totalBytesRead + downloadedBytes]];
         [zipFile setFileSize:[NSString stringWithFormat:@"%llu",totalBytesExpectedToRead + downloadedBytes]];
     }];
@@ -232,13 +427,13 @@
     [_operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         [[ZipFileInfoStore sharedStore]saveChanges];
         isDownload=false;
-        UIAlertView *alert=[[UIAlertView alloc]initWithTitle:nil message:@"下载完成\n是否解压？" delegate:self cancelButtonTitle:@"否" otherButtonTitles:@"是", nil];
+        UIAlertView *alert=[[UIAlertView alloc]initWithTitle:nil message:@"下载完成\n是否解压？" delegate:controller cancelButtonTitle:@"否" otherButtonTitles:@"是", nil];
         [alert show];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         [[ZipFileInfoStore sharedStore]saveChanges];
         isDownload=false;
-        UIAlertView *alert=[[UIAlertView alloc]initWithTitle:nil message:error.description delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil];
-        [alert show];
+        h.labelText=@"下载出错";
+        [h hide:YES afterDelay:2];
     }];
     [_operation start];
 }
@@ -247,16 +442,35 @@
     switch (buttonIndex) {
         case 0:
         {
+            [_operation cancel];
+            [downloadBtn setTitle:@"重新下载" forState:UIControlStateNormal];
+            [downloadBtn addTarget:self action:@selector(reDownload:) forControlEvents:UIControlEventTouchDown];
+            [progressView showPopUpViewAnimated:YES];
+            [unZip setAlpha:1.f];
+            [downloadBtn setAlpha:1.f];
+            [progressView setAlpha:0.f];
+            [progressLabel setAlpha:0.f];
             //            [self.navigationController popViewControllerAnimated:YES];
         }
             break;
         case 1:{
-            [self unZip];
+            [_operation cancel];
+            hud=[MBProgressHUD showHUDAddedTo:self.view animated:YES];
+            hud.labelText=@"正在解压";
+            //此处暂停1s
+            [NSTimer scheduledTimerWithTimeInterval:1. target:self selector:@selector(unZip) userInfo:nil repeats:NO];
         }
             break;
         default:
             break;
     }
+}
+-(void)unZipClick:(id)sender{
+    hud=[MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.labelText=@"正在解压";
+    [NSTimer scheduledTimerWithTimeInterval:1. target:self selector:@selector(unZip) userInfo:nil repeats:NO];
+
+//    [self unZip];
 }
 //解压缩
 -(void)unZip{
@@ -289,8 +503,8 @@
             }
             [zipFile setIsUnzip:YES];
             [[ZipFileInfoStore sharedStore]saveChanges];
-            UIAlertView *alert=[[UIAlertView alloc]initWithTitle:nil message:@"解压完成！" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil];
-            [alert show];
+            hud.labelText=@"解压完成";
+            [hud hide:YES afterDelay:1];
             [downloadBtn setTitle:@"重新下载" forState:UIControlStateNormal];
             [downloadBtn removeTarget:self action:@selector(download:) forControlEvents:UIControlEventTouchDown];
             [downloadBtn removeTarget:self action:@selector(pauseDownload:) forControlEvents:UIControlEventTouchDown];
@@ -302,6 +516,9 @@
             [progressLabel setAlpha:0.f];
             isDownload=false;
         });
+    }else{
+        hud.labelText=@"不存在压缩文件";
+        [hud hide:YES afterDelay:1];
     }
 }
 //获取已下载的文件大小

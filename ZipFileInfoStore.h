@@ -1,9 +1,9 @@
 //
 //  ZipFileInfoStore.h
-//  Translate
+//  下载实体管理类
 //
-//  Created by zz on 15/9/15.
-//  Copyright (c) 2015年 zz. All rights reserved.
+//  Created by zll on  15/9/14.
+//  Copyright (c) 2015年 zll. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

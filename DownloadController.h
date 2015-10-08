@@ -2,8 +2,8 @@
 //  DownloadController.h
 //  Translate
 //
-//  Created by zz on 15/9/15.
-//  Copyright (c) 2015年 zz. All rights reserved.
+//  Created by zll on  15/9/14.
+//  Copyright (c) 2015年 zll. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -14,6 +14,8 @@
 #import "ZipArchive.h"
 #import "ZipFileInfoStore.h"
 #import "ZipFileInfoItem.h"
+#import "NetTool.h"
+#import "MBProgressHUD.h"
 @interface DownloadController : UIViewController<NSURLSessionTaskDelegate,NSURLSessionDataDelegate,NSURLSessionDownloadDelegate,NSURLSessionDelegate,UIAlertViewDelegate>
 {
     NSString *zipName;
@@ -22,6 +24,7 @@
     ASProgressPopUpView *progressView;
     UILabel *progressLabel;
     BOOL isDownload;
+    MBProgressHUD *hud;
 }
 @property(nonatomic,retain)AFHTTPRequestOperation *operation;
 @end

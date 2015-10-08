@@ -17,11 +17,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="更多" id="KqO-0J-jbS"/>
+                    <tabBarItem key="tabBarItem" tag="4" title="更多" id="KqO-0J-jbS"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="n6b-Zq-ss5" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1257" y="1959"/>
+            <point key="canvasLocation" x="545" y="2087"/>
         </scene>
         <!--字典-->
         <scene sceneID="LW3-O4-CGY">
@@ -36,11 +36,30 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="字典" id="kup-Jl-Et1"/>
+                    <tabBarItem key="tabBarItem" tag="2" title="字典" id="kup-Jl-Et1"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="96B-Td-Wta" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1257" y="1287"/>
+            <point key="canvasLocation" x="1257" y="1317"/>
+        </scene>
+        <!--记录-->
+        <scene sceneID="5x2-ST-X1X">
+            <objects>
+                <viewController id="hRs-fG-xbX" customClass="HistoryController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="6Rl-we-b1h"/>
+                        <viewControllerLayoutGuide type="bottom" id="w2N-3m-49i"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="NKm-eV-N7q">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" tag="3" title="记录" id="fyP-za-SU6"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="VYF-DS-WUz" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1257" y="2087"/>
         </scene>
         <!--汉语-->
         <scene sceneID="8gY-ZQ-AM4">
@@ -55,7 +74,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="汉语" id="86x-xZ-VEM"/>
+                    <tabBarItem key="tabBarItem" tag="1" title="汉语" id="86x-xZ-VEM"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="uKe-Vg-GlL" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -95,6 +114,7 @@
                         <segue destination="rW6-0M-jeC" kind="relationship" relationship="viewControllers" id="B5d-HX-TLv"/>
                         <segue destination="kiU-4j-cn9" kind="relationship" relationship="viewControllers" id="ytr-Ts-FUv"/>
                         <segue destination="h3T-NH-4Zd" kind="relationship" relationship="viewControllers" id="tGt-Ef-eNX"/>
+                        <segue destination="hRs-fG-xbX" kind="relationship" relationship="viewControllers" id="U8w-7f-CwU"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2jG-Ab-Dwm" userLabel="First Responder" sceneMemberID="firstResponder"/>
